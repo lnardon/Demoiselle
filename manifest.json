@@ -1,0 +1,19 @@
+{
+    "manifest_version": 3,
+    "name": "Demoiselle",
+    "description": "Change the way to interact with the browser by adding a floating menu to the current page with controls.",
+    "version": "0.1",
+    "action": {
+        "default_title": "Demoiselle Extension",
+        "default_popup": "index.html"
+    },
+    "background": {
+        "service_worker": "./background.js"
+    },
+    "content_scripts": [
+        {
+            "matches": ["<all_urls>"],
+            "js": ["./content.js"]
+        }
+    ]
+}
