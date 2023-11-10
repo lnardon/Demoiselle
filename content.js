@@ -1,18 +1,10 @@
 let isMenuOpen = false;
 
 setTimeout(() => {
-  document.styleSheets[0].insertRule(`
-    @keyframes appear {
-      from {
-        opacity: 0;
-        transform: scale(0.32)
-      }
-      to {
-        opacity: 1;
-        transform: scale(1)
-      }
-    }
-  `);
+  document.styleSheets[0].insertRule(menuAppear);
+  document.styleSheets[0].insertRule(tabsAppear);
+  document.styleSheets[0].insertRule(backdrop);
+  document.styleSheets[0].insertRule(input);
 
   const menu = document.createElement("img");
   menu.src =
@@ -27,7 +19,7 @@ setTimeout(() => {
   menu.style.zIndex = "999999999";
   menu.style.cursor = "pointer";
   menu.style.animation =
-    "appear .7s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards";
+    "menuAppear .7s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards";
   document.body.append(menu);
 
   menu.addEventListener("click", () => {
@@ -72,19 +64,6 @@ setTimeout(() => {
       tabsContainer.style.gap = "0.25rem";
       document.body.appendChild(tabsContainer);
     }
-    document.styleSheets[0].insertRule(`
-        @keyframes tabsAppear {
-          from {
-            opacity: 0;
-            clip-path: polygon(0% 84.4%, 0% 100%,8.6% 100%,8.7% 84.4%);
-          }
-          to {
-            opacity: 1;
-            clip-path: polygon(0% 0%, 0% 100%,100% 100%,100% 0%)
-          }
-        }
-      `);
-
     tabsContainer.innerHTML = "";
 
     tabs.forEach((tab) => {
@@ -95,6 +74,18 @@ setTimeout(() => {
       tabElement.style.display = "flex";
       tabElement.style.flexDirection = "row";
       tabElement.style.gap = "0.5rem";
+      tabElement.style.cursor = "pointer";
+      tabElement.style.borderRadius = "0.25rem";
+      tabElement.style.transition = "all .3s ease";
+      tabElement.classList.add("tabContainer");
+      tabElement.addEventListener("click", () => {
+        isMenuOpen = false;
+        document.getElementById("tabs-list-container").remove();
+        chrome.runtime.sendMessage({
+          action: "switchTab",
+          tabId: tab.id,
+        });
+      });
 
       if (tab.active) {
         tabElement.style.backgroundColor = "#ccc";
@@ -124,24 +115,6 @@ setTimeout(() => {
       });
 
       tabElement.appendChild(closeButton);
-
-      const url = document.createElement("div");
-      url.textContent = tab.url;
-      url.style.fontSize = "0.8rem";
-      url.style.color = "#555";
-
-      // tabElement.appendChild(url);
-      tabElement.style.cursor = "pointer";
-      tabElement.style.borderRadius = "0.25rem";
-      tabElement.style.transition = "all .3s ease";
-      tabElement.classList.add("tabContainer");
-
-      tabElement.addEventListener("click", () => {
-        isMenuOpen = false;
-        document.getElementById("tabs-list-container").remove();
-        chrome.runtime.sendMessage({ action: "switchTab", tabId: tab.id });
-      });
-
       tabsContainer.appendChild(tabElement);
     });
   }
@@ -158,7 +131,9 @@ document.addEventListener("keydown", function (event) {
       backdrop.style.left = "0";
       backdrop.style.width = "100vw";
       backdrop.style.height = "100vh";
+      backdrop.style.zIndex = "9999";
       backdrop.style.backgroundColor = "rgba(0,0,0,0.72)";
+      backdrop.style.animation = "backdrop .3s ease forwards";
       document.body.appendChild(backdrop);
 
       const input = document.createElement("input");
@@ -169,13 +144,19 @@ document.addEventListener("keydown", function (event) {
       input.style.transform = "translate(-50%, -50%)";
       input.style.zIndex = 10000;
       input.style.width = "90%";
-      input.style.maxWidth = "30rem";
-      input.style.fontSize = "1.5rem";
-      input.style.border = "0.125rem solid #ccc";
+      input.style.maxWidth = "35rem";
+      input.style.fontSize = "2rem";
+      input.style.border = "0.125rem solid #212121";
       input.style.borderRadius = "0.5rem";
-      input.style.boxShadow = "0px 0px 2rem 1rem rgba(0, 0, 0, 0.35)";
-      input.style.padding = "1rem";
+      input.style.boxShadow = "0px 0px 2rem 1rem rgba(0, 0, 0, 0.5)";
+      input.style.padding = "0.75rem 1rem";
       input.style.boxSizing = "border-box";
+      input.style.animation = "input .3s ease forwards";
+      input.style.backgroundColor = "#fafafa";
+      input.style.color = "#191919";
+      input.style.textDecoration = "none";
+      input.style.outline = "none";
+      input.style.fontWeight = "bold";
 
       document.body.appendChild(input);
       input.focus();
@@ -196,3 +177,54 @@ document.addEventListener("keydown", function (event) {
     }
   }
 });
+
+// CSS ANIMATIONS
+const menuAppear = `
+  @keyframes menuAppear {
+    from {
+      opacity: 0;
+      transform: scale(0.32)
+    }
+    to {
+      opacity: 1;
+      transform: scale(1)
+    }
+  }
+`;
+
+const tabsAppear = `
+  @keyframes tabsAppear {
+    from {
+      opacity: 0;
+      clip-path: polygon(0% 84.4%, 0% 100%,8.6% 100%,8.7% 84.4%);
+    }
+    to {
+      opacity: 1;
+      clip-path: polygon(0% 0%, 0% 100%,100% 100%,100% 0%)
+    }
+  }
+`;
+
+const backdrop = `
+  @keyframes backdrop {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+`;
+
+const input = `
+  @keyframes input {
+    from {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0.32) translateY(2rem);
+    }
+    to {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1) translateY(0rem);
+    }
+  }
+`;
