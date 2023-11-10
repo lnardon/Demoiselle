@@ -36,9 +36,7 @@ setTimeout(() => {
         document.getElementById("tabs-list-container").style.animation =
           "tabsAppear .3s ease reverse";
         isMenuOpen = false;
-        // setTimeout(() => {
         document.getElementById("tabs-list-container").remove();
-        // }, 300);
         return;
       } else {
         displayTabs(response.tabs);
@@ -65,10 +63,13 @@ setTimeout(() => {
       tabsContainer.style.backgroundColor = "#eee";
       tabsContainer.style.boxShadow = "0px 0px 19px 7px rgba(0,0,0,0.2)";
       tabsContainer.style.zIndex = "1000000000";
-      tabsContainer.style.padding = "0.25rem";
+      tabsContainer.style.padding = "0.25rem 0.125rem";
       tabsContainer.style.borderRadius = "0.25rem";
       tabsContainer.style.border = "0.25rem solid #fafafa";
       tabsContainer.style.animation = "tabsAppear .3s ease forwards";
+      tabsContainer.style.display = "flex";
+      tabsContainer.style.flexDirection = "column";
+      tabsContainer.style.gap = "0.25rem";
       document.body.appendChild(tabsContainer);
     }
     document.styleSheets[0].insertRule(`
@@ -91,6 +92,9 @@ setTimeout(() => {
       tabElement.style.padding = "0.5rem";
       tabElement.style.borderBottom = "1px solid #ccc";
       tabElement.style.backgroundColor = "#fafafa";
+      tabElement.style.display = "flex";
+      tabElement.style.flexDirection = "row";
+      tabElement.style.gap = "0.5rem";
 
       if (tab.active) {
         tabElement.style.backgroundColor = "#ccc";
@@ -104,13 +108,28 @@ setTimeout(() => {
       title.style.overflow = "hidden";
       title.style.textOverflow = "ellipsis";
       title.style.width = "100%";
+      tabElement.appendChild(title);
+
+      const closeButton = document.createElement("span");
+      closeButton.textContent = "X";
+      closeButton.style.cursor = "pointer";
+      closeButton.style.padding = "0 0.5rem";
+      closeButton.style.color = "red";
+      closeButton.style.fontWeight = "bold";
+      closeButton.addEventListener("click", function (event) {
+        event.stopPropagation();
+        isMenuOpen = false;
+        document.getElementById("tabs-list-container").remove();
+        chrome.runtime.sendMessage({ action: "closeTab", tabId: tab.id });
+      });
+
+      tabElement.appendChild(closeButton);
 
       const url = document.createElement("div");
       url.textContent = tab.url;
       url.style.fontSize = "0.8rem";
       url.style.color = "#555";
 
-      tabElement.appendChild(title);
       // tabElement.appendChild(url);
       tabElement.style.cursor = "pointer";
       tabElement.style.borderRadius = "0.25rem";
@@ -127,3 +146,53 @@ setTimeout(() => {
     });
   }
 }, 250);
+
+document.addEventListener("keydown", function (event) {
+  if (event.altKey && event.key === "s") {
+    event.preventDefault();
+
+    if (!document.getElementById("customSearchInput")) {
+      const backdrop = document.createElement("div");
+      backdrop.style.position = "fixed";
+      backdrop.style.top = "0";
+      backdrop.style.left = "0";
+      backdrop.style.width = "100vw";
+      backdrop.style.height = "100vh";
+      backdrop.style.backgroundColor = "rgba(0,0,0,0.72)";
+      document.body.appendChild(backdrop);
+
+      const input = document.createElement("input");
+      input.id = "customSearchInput";
+      input.style.position = "fixed";
+      input.style.top = "50%";
+      input.style.left = "50%";
+      input.style.transform = "translate(-50%, -50%)";
+      input.style.zIndex = 10000;
+      input.style.width = "90%";
+      input.style.maxWidth = "30rem";
+      input.style.fontSize = "1.5rem";
+      input.style.border = "0.125rem solid #ccc";
+      input.style.borderRadius = "0.5rem";
+      input.style.boxShadow = "0px 0px 2rem 1rem rgba(0, 0, 0, 0.35)";
+      input.style.padding = "1rem";
+      input.style.boxSizing = "border-box";
+
+      document.body.appendChild(input);
+      input.focus();
+
+      input.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+          const searchTerm = encodeURIComponent(input.value);
+          const googleUrl = `https://www.google.com/search?q=${searchTerm}`;
+          input.remove();
+          backdrop.remove();
+          chrome.runtime.sendMessage({ action: "openGoogle", url: googleUrl });
+        }
+        if (e.key === "Escape") {
+          backdrop.remove();
+          input.remove();
+        }
+      });
+    }
+  }
+});
