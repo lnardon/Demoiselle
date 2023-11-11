@@ -22,23 +22,6 @@ setTimeout(() => {
     "menuAppear .7s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards";
   document.body.append(menu);
 
-  menu.addEventListener("click", () => {
-    chrome.runtime.sendMessage({ action: "getTabs" }, function (response) {
-      if (isMenuOpen) {
-        document.getElementById("tabs-list-container").style.animation =
-          "tabsAppear .3s ease reverse";
-        isMenuOpen = false;
-        document.getElementById("tabs-list-container").remove();
-        return;
-      } else {
-        displayTabs(response.tabs);
-        document.getElementById("tabs-list-container").style.animation =
-          "tabsAppear .3s ease normal forwards";
-        isMenuOpen = true;
-      }
-    });
-  });
-
   function displayTabs(tabs) {
     let tabsContainer = document.getElementById("tabs-list-container");
     if (!tabsContainer) {
@@ -109,8 +92,7 @@ setTimeout(() => {
       closeButton.style.fontWeight = "bold";
       closeButton.addEventListener("click", function (event) {
         event.stopPropagation();
-        isMenuOpen = false;
-        document.getElementById("tabs-list-container").remove();
+        closeExtension();
         chrome.runtime.sendMessage({ action: "closeTab", tabId: tab.id });
       });
 
@@ -123,9 +105,90 @@ setTimeout(() => {
 document.addEventListener("keydown", function (event) {
   if (event.altKey && event.key === "s") {
     event.preventDefault();
+    chrome.runtime.sendMessage({ action: "getTabs" }, function (response) {
+      let tabs = response.tabs;
+      let tabsContainer = document.getElementById("tabs-list-container");
+      if (!tabsContainer) {
+        document.styleSheets[0].insertRule(
+          ".tabContainer:hover{background-color: #cccee6}"
+        );
+        tabsContainer = document.createElement("div");
+        tabsContainer.id = "tabs-list-container";
+        tabsContainer.style.position = "fixed";
+        tabsContainer.style.bottom = "5rem";
+        tabsContainer.style.left = "2rem";
+        tabsContainer.style.width = "15rem";
+        tabsContainer.style.maxHeight = "20rem";
+        tabsContainer.style.backgroundColor = "#eee";
+        tabsContainer.style.boxShadow = "0px 0px 19px 7px rgba(0,0,0,0.2)";
+        tabsContainer.style.zIndex = "1000000000";
+        tabsContainer.style.padding = "0.25rem 0.125rem";
+        tabsContainer.style.borderRadius = "0.25rem";
+        tabsContainer.style.border = "0.25rem solid #fafafa";
+        tabsContainer.style.animation = "tabsAppear .3s ease forwards";
+        tabsContainer.style.display = "flex";
+        tabsContainer.style.flexDirection = "column";
+        tabsContainer.style.gap = "0.25rem";
+        tabsContainer.style.overflow = "auto";
+        document.body.appendChild(tabsContainer);
+      }
+      tabsContainer.innerHTML = "";
 
+      tabs.forEach((tab) => {
+        const tabElement = document.createElement("div");
+        tabElement.style.padding = "0.5rem";
+        tabElement.style.borderBottom = "1px solid #ccc";
+        tabElement.style.backgroundColor = "#fafafa";
+        tabElement.style.display = "flex";
+        tabElement.style.flexDirection = "row";
+        tabElement.style.gap = "0.5rem";
+        tabElement.style.cursor = "pointer";
+        tabElement.style.borderRadius = "0.25rem";
+        tabElement.style.transition = "all .3s ease";
+        tabElement.classList.add("tabContainer");
+        tabElement.addEventListener("click", () => {
+          isMenuOpen = false;
+          document.getElementById("tabs-list-container").remove();
+          chrome.runtime.sendMessage({
+            action: "switchTab",
+            tabId: tab.id,
+          });
+        });
+
+        if (tab.active) {
+          tabElement.style.backgroundColor = "#ccc";
+        }
+
+        const title = document.createElement("div");
+        title.textContent = tab.title;
+        title.style.fontWeight = "bold";
+        title.style.color = "#232323";
+        title.style.whiteSpace = "nowrap";
+        title.style.overflow = "hidden";
+        title.style.textOverflow = "ellipsis";
+        title.style.width = "100%";
+        tabElement.appendChild(title);
+
+        const closeButton = document.createElement("span");
+        closeButton.textContent = "X";
+        closeButton.style.cursor = "pointer";
+        closeButton.style.padding = "0 0.5rem";
+        closeButton.style.color = "red";
+        closeButton.style.fontWeight = "bold";
+        closeButton.addEventListener("click", function (event) {
+          event.stopPropagation();
+          closeExtension();
+          chrome.runtime.sendMessage({ action: "closeTab", tabId: tab.id });
+        });
+
+        tabElement.appendChild(closeButton);
+        tabsContainer.appendChild(tabElement);
+      });
+      isMenuOpen = true;
+    });
     if (!document.getElementById("customSearchInput")) {
       const backdrop = document.createElement("div");
+      backdrop.id = "backdrop";
       backdrop.style.position = "fixed";
       backdrop.style.top = "0";
       backdrop.style.left = "0";
@@ -135,6 +198,93 @@ document.addEventListener("keydown", function (event) {
       backdrop.style.backgroundColor = "rgba(0,0,0,0.72)";
       backdrop.style.animation = "backdrop .3s ease forwards";
       document.body.appendChild(backdrop);
+
+      const addressSection = document.createElement("div");
+      addressSection.style.position = "fixed";
+      addressSection.style.top = "43%";
+      addressSection.style.left = "50%";
+      addressSection.style.transform = "translate(-50%, -50%)";
+      addressSection.style.zIndex = 10000;
+      addressSection.style.width = "90%";
+      addressSection.style.maxWidth = "35rem";
+      addressSection.style.display = "flex";
+      addressSection.style.flexDirection = "row";
+      addressSection.style.gap = "0.5rem";
+      addressSection.style.alignItems = "center";
+      addressSection.style.justifyContent = "center";
+      addressSection.style.animation = "input .3s ease forwards";
+
+      const addressBar = document.createElement("input");
+      addressBar.id = "addressBar";
+      addressSection.style.transform = "translate(-50%, -50%)";
+      addressBar.style.width = "30rem";
+      addressBar.style.fontSize = "1rem";
+      addressBar.style.border = "0.125rem solid #212121";
+      addressBar.style.borderRadius = "0.5rem";
+      addressBar.style.boxShadow = "0px 0px 2rem 1rem rgba(0, 0, 0, 0.5)";
+      addressBar.style.padding = "0.5rem 0.75rem";
+      addressBar.style.boxSizing = "border-box";
+      addressBar.style.backgroundColor = "#fafafa";
+      addressBar.style.color = "#191919";
+      addressBar.style.textDecoration = "none";
+      addressBar.style.outline = "none";
+      addressBar.style.fontWeight = "500";
+
+      addressBar.value = window.location.href;
+      addressBar.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+          let url = addressBar.value;
+          if (url.substring(0, 4) !== "http") {
+            url = "https://" + url;
+          }
+          closeExtension();
+          window.open(url, "_self");
+        }
+      });
+
+      const backButton = document.createElement("img");
+      backButton.id = "backButton";
+      backButton.src =
+        "https://raw.githubusercontent.com/lnardon/Demoiselle/main/assets/arrow.png";
+      backButton.style.transform = "rotateY(180deg)";
+      backButton.style.padding = "0.125rem";
+      backButton.style.borderRadius = "0.5rem";
+      backButton.style.border = "0.125rem solid #212121";
+      backButton.style.backgroundColor = "#fafafa";
+      backButton.style.color = "#191919";
+      backButton.style.outline = "none";
+      backButton.style.width = "2.5rem";
+      backButton.style.height = "2.5rem";
+      backButton.style.cursor = "pointer";
+
+      backButton.addEventListener("click", function () {
+        closeExtension();
+        window.history.back();
+      });
+
+      const forwardButton = document.createElement("img");
+      forwardButton.id = "forwardButton";
+      forwardButton.src =
+        "https://raw.githubusercontent.com/lnardon/Demoiselle/main/assets/arrow.png";
+      forwardButton.style.width = "2.5rem";
+      forwardButton.style.height = "2.5rem";
+      forwardButton.style.padding = "0.125rem";
+      forwardButton.style.borderRadius = "0.5rem";
+      forwardButton.style.border = "0.125rem solid #212121";
+      forwardButton.style.backgroundColor = "#fafafa";
+      forwardButton.style.color = "#191919";
+      forwardButton.style.outline = "none";
+      forwardButton.style.cursor = "pointer";
+
+      forwardButton.addEventListener("click", function () {
+        closeExtension();
+        window.history.forward();
+      });
+
+      addressSection.appendChild(addressBar);
+      addressSection.appendChild(backButton);
+      addressSection.appendChild(forwardButton);
+      document.body.appendChild(addressSection);
 
       const input = document.createElement("input");
       input.id = "customSearchInput";
@@ -165,18 +315,27 @@ document.addEventListener("keydown", function (event) {
         if (e.key === "Enter") {
           const searchTerm = encodeURIComponent(input.value);
           const googleUrl = `https://www.google.com/search?q=${searchTerm}`;
-          input.remove();
-          backdrop.remove();
+          closeExtension();
           chrome.runtime.sendMessage({ action: "openGoogle", url: googleUrl });
         }
         if (e.key === "Escape") {
-          backdrop.remove();
-          input.remove();
+          closeExtension();
         }
       });
     }
   }
 });
+
+// Helper functions
+function closeExtension() {
+  document.getElementById("tabs-list-container").remove();
+  document.getElementById("customSearchInput").remove();
+  document.getElementById("addressBar").remove();
+  document.getElementById("backdrop").remove();
+  document.getElementById("backButton").remove();
+  document.getElementById("forwardButton").remove();
+  isMenuOpen = false;
+}
 
 // CSS ANIMATIONS
 const menuAppear = `
