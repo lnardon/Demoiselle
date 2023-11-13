@@ -118,6 +118,10 @@ setTimeout(() => {
 document.addEventListener("keydown", function (event) {
   if (event.altKey && event.key === "s") {
     event.preventDefault();
+    const extensionContent = document.createElement("div");
+    extensionContent.id = "extensionContent";
+    extensionContent.style.position = "relative";
+
     chrome.runtime.sendMessage({ action: "getTabs" }, function (response) {
       let tabs = response.tabs;
       let tabsContainer = document.getElementById("tabs-list-container");
@@ -129,20 +133,18 @@ document.addEventListener("keydown", function (event) {
         tabsContainer.id = "tabs-list-container";
         tabsContainer.style.bottom = "5rem";
         tabsContainer.style.left = "2rem";
-        tabsContainer.style.width = "15rem";
-        tabsContainer.style.maxHeight = "20rem";
+        tabsContainer.style.width = "100%";
         tabsContainer.style.backgroundColor = "#eee";
         tabsContainer.style.boxShadow = "0px 0px 19px 7px rgba(0,0,0,0.2)";
         tabsContainer.style.zIndex = "1000000000";
         tabsContainer.style.padding = "0.25rem 0.125rem";
         tabsContainer.style.borderRadius = "0.25rem";
         tabsContainer.style.border = "0.25rem solid #fafafa";
-        tabsContainer.style.animation = "tabsAppear .3s ease forwards";
+        tabsContainer.style.animation = "input .5s ease forwards";
         tabsContainer.style.display = "flex";
         tabsContainer.style.flexDirection = "column";
         tabsContainer.style.gap = "0.25rem";
         tabsContainer.style.overflow = "auto";
-        extensionContainer.appendChild(tabsContainer);
       }
       tabsContainer.innerHTML = "";
 
@@ -180,12 +182,13 @@ document.addEventListener("keydown", function (event) {
         title.style.width = "100%";
         tabElement.appendChild(title);
 
-        const closeButton = document.createElement("span");
-        closeButton.textContent = "X";
+        const closeButton = document.createElement("img");
+        closeButton.src =
+          "https://raw.githubusercontent.com/lnardon/Demoiselle/main/assets/close.png";
         closeButton.style.cursor = "pointer";
         closeButton.style.padding = "0 0.5rem";
-        closeButton.style.color = "red";
-        closeButton.style.fontWeight = "bold";
+        closeButton.style.width = "1rem";
+        closeButton.style.height = "1rem";
         closeButton.addEventListener("click", function (event) {
           event.stopPropagation();
           closeExtension();
@@ -195,30 +198,25 @@ document.addEventListener("keydown", function (event) {
         tabElement.appendChild(closeButton);
         tabsContainer.appendChild(tabElement);
       });
+      extensionContent.appendChild(tabsContainer);
       isMenuOpen = true;
     });
-
-    const extensionContent = document.createElement("div");
-    extensionContent.id = "extensionContent";
-    extensionContent.style.position = "relative";
 
     if (!document.getElementById("customSearchInput")) {
       const addressSection = document.createElement("div");
       addressSection.style.zIndex = 10000;
-      addressSection.style.width = "90%";
-      addressSection.style.maxWidth = "35rem";
+      addressSection.style.width = "100%";
       addressSection.style.display = "flex";
       addressSection.style.flexDirection = "row";
       addressSection.style.gap = "0.5rem";
       addressSection.style.alignItems = "center";
       addressSection.style.justifyContent = "center";
       addressSection.style.animation = "input .3s ease forwards";
-      addressSection.style.marginBottom = "2rem";
+      addressSection.style.marginBottom = "1rem";
 
       const addressBar = document.createElement("input");
       addressBar.id = "addressBar";
-      addressBar.style.width = "30rem";
-      addressBar.style.fontSize = "1rem";
+      addressBar.style.width = "100%";
       addressBar.style.border = "0.125rem solid #212121";
       addressBar.style.borderRadius = "0.5rem";
       addressBar.style.boxShadow = "0px 0px 1rem 0.25rem rgba(0, 0, 0, 0.2)";
@@ -228,6 +226,7 @@ document.addEventListener("keydown", function (event) {
       addressBar.style.color = "#191919";
       addressBar.style.textDecoration = "none";
       addressBar.style.outline = "none";
+      addressBar.style.fontSize = "1.25rem";
       addressBar.style.fontWeight = "500";
 
       addressBar.value = window.location.href;
@@ -252,8 +251,8 @@ document.addEventListener("keydown", function (event) {
       backButton.style.border = "none";
       backButton.style.color = "#191919";
       backButton.style.outline = "none";
-      backButton.style.width = "2.5rem";
-      backButton.style.height = "2.5rem";
+      backButton.style.width = "3.5rem";
+      backButton.style.height = "3.5rem";
       backButton.style.cursor = "pointer";
       backButton.style.transition = ".3s ease";
 
@@ -267,8 +266,8 @@ document.addEventListener("keydown", function (event) {
       forwardButton.classList.add("pageBtn");
       forwardButton.src =
         "https://raw.githubusercontent.com/lnardon/Demoiselle/main/assets/arrow.png";
-      forwardButton.style.width = "2.5rem";
-      forwardButton.style.height = "2.5rem";
+      forwardButton.style.width = "3.5rem";
+      forwardButton.style.height = "3.5rem";
       forwardButton.style.borderRadius = "0.5rem";
       forwardButton.style.border = "none";
       forwardButton.style.color = "#191919";
@@ -295,8 +294,7 @@ document.addEventListener("keydown", function (event) {
       const input = document.createElement("input");
       input.id = "customSearchInput";
       input.style.zIndex = 10000;
-      input.style.width = "90%";
-      input.style.maxWidth = "35rem";
+      input.style.width = "100%";
       input.style.fontSize = "2rem";
       input.style.border = "0.125rem solid #212121";
       input.style.borderRadius = "0.5rem";
@@ -309,6 +307,7 @@ document.addEventListener("keydown", function (event) {
       input.style.textDecoration = "none";
       input.style.outline = "none";
       input.style.fontWeight = "bold";
+      input.style.marginBottom = "2rem";
 
       extensionContent.appendChild(input);
 
