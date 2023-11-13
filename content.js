@@ -1,10 +1,24 @@
 let isMenuOpen = false;
+const backdrop = document.createElement("div");
+backdrop.id = "backdrop";
+backdrop.classList.add("demoiselleContainer");
+backdrop.style.top = "0";
+backdrop.style.left = "0";
+backdrop.style.width = "100%";
+backdrop.style.height = "100%";
+backdrop.style.zIndex = "9999";
+backdrop.style.backgroundColor = "rgba(0,0,0,0.8)";
+backdrop.style.animation = "backdrop .3s ease forwards";
 
 setTimeout(() => {
-  document.styleSheets[0].insertRule(menuAppear);
-  document.styleSheets[0].insertRule(tabsAppear);
-  document.styleSheets[0].insertRule(backdrop);
-  document.styleSheets[0].insertRule(input);
+  let styles = document.createElement("style");
+  styles.textContent =
+    menuAppearAnim +
+    tabsAppearAnim +
+    backdropAnim +
+    inputAnim +
+    ".demoiselleContainer { position: fixed !important; top: 0; left: 0; width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; flex-direction: column; background-color: rgba(0,0,0,0.72); z-index: 999999999; box-sizing: border-box; }";
+  document.head.appendChild(styles);
 
   const menu = document.createElement("img");
   menu.src =
@@ -30,7 +44,6 @@ setTimeout(() => {
       );
       tabsContainer = document.createElement("div");
       tabsContainer.id = "tabs-list-container";
-      tabsContainer.style.position = "fixed";
       tabsContainer.style.bottom = "5rem";
       tabsContainer.style.left = "2rem";
       tabsContainer.style.width = "15rem";
@@ -100,7 +113,7 @@ setTimeout(() => {
       tabsContainer.appendChild(tabElement);
     });
   }
-}, 250);
+}, 500);
 
 document.addEventListener("keydown", function (event) {
   if (event.altKey && event.key === "s") {
@@ -114,7 +127,6 @@ document.addEventListener("keydown", function (event) {
         );
         tabsContainer = document.createElement("div");
         tabsContainer.id = "tabs-list-container";
-        tabsContainer.style.position = "fixed";
         tabsContainer.style.bottom = "5rem";
         tabsContainer.style.left = "2rem";
         tabsContainer.style.width = "15rem";
@@ -130,7 +142,7 @@ document.addEventListener("keydown", function (event) {
         tabsContainer.style.flexDirection = "column";
         tabsContainer.style.gap = "0.25rem";
         tabsContainer.style.overflow = "auto";
-        document.body.appendChild(tabsContainer);
+        extensionContainer.appendChild(tabsContainer);
       }
       tabsContainer.innerHTML = "";
 
@@ -147,8 +159,7 @@ document.addEventListener("keydown", function (event) {
         tabElement.style.transition = "all .3s ease";
         tabElement.classList.add("tabContainer");
         tabElement.addEventListener("click", () => {
-          isMenuOpen = false;
-          document.getElementById("tabs-list-container").remove();
+          closeExtension();
           chrome.runtime.sendMessage({
             action: "switchTab",
             tabId: tab.id,
@@ -186,24 +197,13 @@ document.addEventListener("keydown", function (event) {
       });
       isMenuOpen = true;
     });
-    if (!document.getElementById("customSearchInput")) {
-      const backdrop = document.createElement("div");
-      backdrop.id = "backdrop";
-      backdrop.style.position = "fixed";
-      backdrop.style.top = "0";
-      backdrop.style.left = "0";
-      backdrop.style.width = "100vw";
-      backdrop.style.height = "100vh";
-      backdrop.style.zIndex = "9999";
-      backdrop.style.backgroundColor = "rgba(0,0,0,0.72)";
-      backdrop.style.animation = "backdrop .3s ease forwards";
-      document.body.appendChild(backdrop);
 
+    const extensionContent = document.createElement("div");
+    extensionContent.id = "extensionContent";
+    extensionContent.style.position = "relative";
+
+    if (!document.getElementById("customSearchInput")) {
       const addressSection = document.createElement("div");
-      addressSection.style.position = "fixed";
-      addressSection.style.top = "43%";
-      addressSection.style.left = "50%";
-      addressSection.style.transform = "translate(-50%, -50%)";
       addressSection.style.zIndex = 10000;
       addressSection.style.width = "90%";
       addressSection.style.maxWidth = "35rem";
@@ -213,16 +213,16 @@ document.addEventListener("keydown", function (event) {
       addressSection.style.alignItems = "center";
       addressSection.style.justifyContent = "center";
       addressSection.style.animation = "input .3s ease forwards";
+      addressSection.style.marginBottom = "2rem";
 
       const addressBar = document.createElement("input");
       addressBar.id = "addressBar";
-      addressSection.style.transform = "translate(-50%, -50%)";
       addressBar.style.width = "30rem";
       addressBar.style.fontSize = "1rem";
       addressBar.style.border = "0.125rem solid #212121";
       addressBar.style.borderRadius = "0.5rem";
-      addressBar.style.boxShadow = "0px 0px 2rem 1rem rgba(0, 0, 0, 0.5)";
-      addressBar.style.padding = "0.5rem 0.75rem";
+      addressBar.style.boxShadow = "0px 0px 1rem 0.25rem rgba(0, 0, 0, 0.2)";
+      addressBar.style.padding = "0.75rem";
       addressBar.style.boxSizing = "border-box";
       addressBar.style.backgroundColor = "#fafafa";
       addressBar.style.color = "#191919";
@@ -244,18 +244,18 @@ document.addEventListener("keydown", function (event) {
 
       const backButton = document.createElement("img");
       backButton.id = "backButton";
+      backButton.classList.add("pageBtn");
       backButton.src =
         "https://raw.githubusercontent.com/lnardon/Demoiselle/main/assets/arrow.png";
       backButton.style.transform = "rotateY(180deg)";
-      backButton.style.padding = "0.125rem";
       backButton.style.borderRadius = "0.5rem";
-      backButton.style.border = "0.125rem solid #212121";
-      backButton.style.backgroundColor = "#fafafa";
+      backButton.style.border = "none";
       backButton.style.color = "#191919";
       backButton.style.outline = "none";
       backButton.style.width = "2.5rem";
       backButton.style.height = "2.5rem";
       backButton.style.cursor = "pointer";
+      backButton.style.transition = ".3s ease";
 
       backButton.addEventListener("click", function () {
         closeExtension();
@@ -264,41 +264,43 @@ document.addEventListener("keydown", function (event) {
 
       const forwardButton = document.createElement("img");
       forwardButton.id = "forwardButton";
+      forwardButton.classList.add("pageBtn");
       forwardButton.src =
         "https://raw.githubusercontent.com/lnardon/Demoiselle/main/assets/arrow.png";
       forwardButton.style.width = "2.5rem";
       forwardButton.style.height = "2.5rem";
-      forwardButton.style.padding = "0.125rem";
       forwardButton.style.borderRadius = "0.5rem";
-      forwardButton.style.border = "0.125rem solid #212121";
-      forwardButton.style.backgroundColor = "#fafafa";
+      forwardButton.style.border = "none";
       forwardButton.style.color = "#191919";
       forwardButton.style.outline = "none";
       forwardButton.style.cursor = "pointer";
+      forwardButton.style.transition = ".3s ease";
 
       forwardButton.addEventListener("click", function () {
         closeExtension();
         window.history.forward();
       });
+      document.styleSheets[0].insertRule(
+        ".pageBtn{background-color: transparent; border: none; transition: all .5s ease}"
+      );
+      document.styleSheets[0].insertRule(
+        ".pageBtn:hover{background-color: #fafafa !important; transform: scale(1.05)}"
+      );
 
       addressSection.appendChild(addressBar);
       addressSection.appendChild(backButton);
       addressSection.appendChild(forwardButton);
-      document.body.appendChild(addressSection);
+      extensionContent.appendChild(addressSection);
 
       const input = document.createElement("input");
       input.id = "customSearchInput";
-      input.style.position = "fixed";
-      input.style.top = "50%";
-      input.style.left = "50%";
-      input.style.transform = "translate(-50%, -50%)";
       input.style.zIndex = 10000;
       input.style.width = "90%";
       input.style.maxWidth = "35rem";
       input.style.fontSize = "2rem";
       input.style.border = "0.125rem solid #212121";
       input.style.borderRadius = "0.5rem";
-      input.style.boxShadow = "0px 0px 2rem 1rem rgba(0, 0, 0, 0.5)";
+      input.style.boxShadow = "0px 0px 1rem 0.25rem rgba(0, 0, 0, 0.2)";
       input.style.padding = "0.75rem 1rem";
       input.style.boxSizing = "border-box";
       input.style.animation = "input .3s ease forwards";
@@ -308,8 +310,7 @@ document.addEventListener("keydown", function (event) {
       input.style.outline = "none";
       input.style.fontWeight = "bold";
 
-      document.body.appendChild(input);
-      input.focus();
+      extensionContent.appendChild(input);
 
       input.addEventListener("keydown", function (e) {
         if (e.key === "Enter") {
@@ -319,26 +320,27 @@ document.addEventListener("keydown", function (event) {
           chrome.runtime.sendMessage({ action: "openGoogle", url: googleUrl });
         }
         if (e.key === "Escape") {
+          e.stopPropagation();
           closeExtension();
         }
       });
+
+      backdrop.appendChild(extensionContent);
+      document.body.appendChild(backdrop);
+      input.focus();
     }
   }
 });
 
 // Helper functions
 function closeExtension() {
-  document.getElementById("tabs-list-container").remove();
-  document.getElementById("customSearchInput").remove();
-  document.getElementById("addressBar").remove();
-  document.getElementById("backdrop").remove();
-  document.getElementById("backButton").remove();
-  document.getElementById("forwardButton").remove();
+  backdrop.innerHTML = "";
+  backdrop.remove();
   isMenuOpen = false;
 }
 
 // CSS ANIMATIONS
-const menuAppear = `
+const menuAppearAnim = `
   @keyframes menuAppear {
     from {
       opacity: 0;
@@ -351,7 +353,7 @@ const menuAppear = `
   }
 `;
 
-const tabsAppear = `
+const tabsAppearAnim = `
   @keyframes tabsAppear {
     from {
       opacity: 0;
@@ -364,7 +366,7 @@ const tabsAppear = `
   }
 `;
 
-const backdrop = `
+const backdropAnim = `
   @keyframes backdrop {
     from {
       opacity: 0;
@@ -375,15 +377,15 @@ const backdrop = `
   }
 `;
 
-const input = `
+const inputAnim = `
   @keyframes input {
     from {
       opacity: 0;
-      transform: translate(-50%, -50%) scale(0.32) translateY(2rem);
+      transform:scale(0.32) translateY(2rem);
     }
     to {
       opacity: 1;
-      transform: translate(-50%, -50%) scale(1) translateY(0rem);
+      transform:scale(1) translateY(0rem);
     }
   }
 `;
