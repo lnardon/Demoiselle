@@ -21,18 +21,18 @@ setTimeout(() => {
     ".pageBtn{background-color: transparent; border: none; transition: all .5s ease}" +
     ".pageBtn:hover{background-color: #fafafa !important; transform: scale(1.05)}" +
     ".demoiselleContainer { position: fixed !important; top: 0; left: 0; width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; flex-direction: column; background-color: rgba(0,0,0,0.72); z-index: 999999999; box-sizing: border-box; }" +
-    ".tabContainer:hover{background-color: #accee6}";
+    ".tabContainer:hover{background-color: #515151}";
   document.head.appendChild(styles);
 
   const menu = document.createElement("img");
   menu.src =
     "https://raw.githubusercontent.com/lnardon/Demoiselle/main/logo-bg.png";
   menu.style.position = "fixed";
-  menu.style.bottom = "2rem";
-  menu.style.left = "2rem";
-  menu.style.width = "2.5rem";
-  menu.style.height = "2.5rem";
-  menu.style.borderRadius = "0.5rem";
+  menu.style.bottom = "32px";
+  menu.style.left = "32px";
+  menu.style.width = "40px";
+  menu.style.height = "40px";
+  menu.style.borderRadius = "8px";
   menu.style.boxShadow = "0px 0px 19px 7px rgba(0,0,0,0.29)";
   menu.style.zIndex = "999999999";
   menu.style.cursor = "pointer";
@@ -52,36 +52,37 @@ document.addEventListener("keydown", function (event) {
 
     chrome.runtime.sendMessage({ action: "getTabs" }, function (response) {
       let tabs = response.tabs;
+      console.log(tabs.favIconUrl);
       let tabsContainer = document.getElementById("tabs-list-container");
       tabsContainer = document.createElement("div");
       tabsContainer.id = "tabs-list-container";
-      tabsContainer.style.bottom = "5rem";
-      tabsContainer.style.left = "2rem";
       tabsContainer.style.width = "100%";
-      tabsContainer.style.backgroundColor = "#eee";
-      tabsContainer.style.boxShadow = "0px 0px 19px 7px rgba(0,0,0,0.2)";
+      tabsContainer.style.backgroundColor = "#252525";
+      tabsContainer.style.boxShadow = "0px 0px 15px 5px rgba(171,171,171,0.15)";
       tabsContainer.style.zIndex = "1000000000";
-      tabsContainer.style.padding = "0.25rem 0.125rem";
-      tabsContainer.style.borderRadius = "0.25rem";
-      tabsContainer.style.border = "0.25rem solid #fafafa";
+      tabsContainer.style.padding = "16px 12px";
+      tabsContainer.style.borderRadius = "8px";
+      tabsContainer.style.border = "none";
       tabsContainer.style.animation = "input .5s ease forwards";
       tabsContainer.style.display = "flex";
       tabsContainer.style.flexDirection = "column";
-      tabsContainer.style.gap = "0.25rem";
+      tabsContainer.style.gap = "8px";
       tabsContainer.style.overflow = "auto";
-      tabsContainer.innerHTML = "";
+      tabsContainer.style.boxSizing = "border-box";
 
       tabs.forEach((tab) => {
         const tabElement = document.createElement("div");
         tabElement.classList.add("tabContainer");
         tabElement.style.fontFamily = "sans-serif";
-        tabElement.style.padding = "0.5rem";
-        tabElement.style.borderBottom = "1px solid #ccc";
+        tabElement.style.padding = "8px";
+        tabElement.style.borderBottom = "none";
         tabElement.style.display = "flex";
         tabElement.style.flexDirection = "row";
-        tabElement.style.gap = "0.5rem";
+        tabElement.style.alignItems = "center";
+        tabElement.style.justifyContent = "center";
+        tabElement.style.gap = "8px";
         tabElement.style.cursor = "pointer";
-        tabElement.style.borderRadius = "0.25rem";
+        tabElement.style.borderRadius = "4px";
         tabElement.style.transition = "all .1s ease";
         tabElement.classList.add("tabContainer");
         tabElement.addEventListener("click", () => {
@@ -93,14 +94,20 @@ document.addEventListener("keydown", function (event) {
         });
 
         if (tab.active) {
-          tabElement.style.backgroundColor = "#ccc";
+          tabElement.style.backgroundColor = "#515151";
         }
+
+        const favicon = document.createElement("img");
+        favicon.src = tab.favIconUrl;
+        favicon.style.width = "16px";
+        favicon.style.height = "16px";
+        tabElement.appendChild(favicon);
 
         const title = document.createElement("div");
         title.textContent = tab.title;
         title.style.fontFamily = "DejaVu Sans";
-        title.style.fontWeight = "bold";
-        title.style.color = "#232323";
+        title.style.fontWeight = "500";
+        title.style.color = "#fafafa";
         title.style.whiteSpace = "nowrap";
         title.style.overflow = "hidden";
         title.style.textOverflow = "ellipsis";
@@ -111,8 +118,8 @@ document.addEventListener("keydown", function (event) {
         closeButton.src =
           "https://raw.githubusercontent.com/lnardon/Demoiselle/main/assets/close.png";
         closeButton.style.cursor = "pointer";
-        closeButton.style.width = "1rem";
-        closeButton.style.height = "1rem";
+        closeButton.style.width = "16px";
+        closeButton.style.height = "16px";
         closeButton.addEventListener("click", function (event) {
           event.stopPropagation();
           closeExtension();
@@ -132,25 +139,25 @@ document.addEventListener("keydown", function (event) {
       addressSection.style.width = "100%";
       addressSection.style.display = "flex";
       addressSection.style.flexDirection = "row";
-      addressSection.style.gap = "0.5rem";
+      addressSection.style.gap = "8px";
       addressSection.style.alignItems = "center";
       addressSection.style.justifyContent = "center";
       addressSection.style.animation = "input .5s ease forwards";
-      addressSection.style.marginBottom = "1rem";
+      addressSection.style.marginBottom = "16px";
 
       const addressBar = document.createElement("input");
       addressBar.id = "addressBar";
       addressBar.style.width = "100%";
-      addressBar.style.border = "0.125rem solid #212121";
-      addressBar.style.borderRadius = "0.5rem";
+      addressBar.style.border = "2px solid #212121";
+      addressBar.style.borderRadius = "8px";
       addressBar.style.boxShadow = "0px 0px 1rem 0.25rem rgba(0, 0, 0, 0.2)";
-      addressBar.style.padding = "0.75rem";
+      addressBar.style.padding = "12px";
       addressBar.style.boxSizing = "border-box";
       addressBar.style.backgroundColor = "#fafafa";
       addressBar.style.color = "#191919";
       addressBar.style.textDecoration = "none";
       addressBar.style.outline = "none";
-      addressBar.style.fontSize = "1.25rem";
+      addressBar.style.fontSize = "20px";
       addressBar.style.fontWeight = "500";
       addressBar.style.fontFamily = "DejaVu Sans !important";
 
@@ -172,12 +179,12 @@ document.addEventListener("keydown", function (event) {
       backButton.src =
         "https://raw.githubusercontent.com/lnardon/Demoiselle/main/assets/arrow.png";
       backButton.style.transform = "rotateY(180deg)";
-      backButton.style.borderRadius = "0.5rem";
+      backButton.style.borderRadius = "8px";
       backButton.style.border = "none";
       backButton.style.color = "#191919";
       backButton.style.outline = "none";
-      backButton.style.width = "3.5rem";
-      backButton.style.height = "3.5rem";
+      backButton.style.width = "55px";
+      backButton.style.height = "55px";
       backButton.style.cursor = "pointer";
       backButton.style.transition = ".5s ease";
 
@@ -191,9 +198,9 @@ document.addEventListener("keydown", function (event) {
       forwardButton.classList.add("pageBtn");
       forwardButton.src =
         "https://raw.githubusercontent.com/lnardon/Demoiselle/main/assets/arrow.png";
-      forwardButton.style.width = "3.5rem";
-      forwardButton.style.height = "3.5rem";
-      forwardButton.style.borderRadius = "0.5rem";
+      forwardButton.style.width = "55px";
+      forwardButton.style.height = "55px";
+      forwardButton.style.borderRadius = "8px";
       forwardButton.style.border = "none";
       forwardButton.style.color = "#191919";
       forwardButton.style.outline = "none";
@@ -214,11 +221,11 @@ document.addEventListener("keydown", function (event) {
       input.id = "customSearchInput";
       input.style.zIndex = 10000;
       input.style.width = "100%";
-      input.style.fontSize = "2rem";
-      input.style.border = "0.125rem solid #212121";
+      input.style.fontSize = "32px";
+      input.style.border = "2px solid #212121";
       input.style.borderRadius = "0.5rem";
       input.style.boxShadow = "0px 0px 1rem 0.25rem rgba(0, 0, 0, 0.2)";
-      input.style.padding = "0.75rem 1rem";
+      input.style.padding = "16px";
       input.style.boxSizing = "border-box";
       input.style.animation = "input .5s ease forwards";
       input.style.backgroundColor = "#fafafa";
@@ -226,7 +233,7 @@ document.addEventListener("keydown", function (event) {
       input.style.textDecoration = "none";
       input.style.outline = "none";
       input.style.fontWeight = "bold";
-      input.style.marginBottom = "1rem";
+      input.style.marginBottom = "16px";
 
       extensionContent.appendChild(input);
 
@@ -262,7 +269,7 @@ const menuAppearAnim = `
   @keyframes menuAppear {
     from {
       opacity: 0;
-      transform: scale(0.32)
+      transform: scale(0.8)
     }
     to {
       opacity: 1;
@@ -299,11 +306,11 @@ const inputAnim = `
   @keyframes input {
     from {
       opacity: 0;
-      transform:scale(0.32) translateY(2rem);
+      transform:scale(0.8) translateY(32px);
     }
     to {
       opacity: 1;
-      transform:scale(1) translateY(0rem);
+      transform:scale(1) translateY(0px);
     }
   }
 `;
