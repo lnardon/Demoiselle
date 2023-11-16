@@ -21,25 +21,10 @@ setTimeout(() => {
     ".pageBtn{background-color: transparent; border: none; transition: all .5s ease}" +
     ".pageBtn:hover{background-color: #fafafa !important; transform: scale(1.05)}" +
     ".demoiselleContainer { position: fixed !important; top: 0; left: 0; width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; flex-direction: column; background-color: rgba(0,0,0,0.72); z-index: 999999999; box-sizing: border-box; }" +
-    ".tabContainer:hover{background-color: #515151}";
+    ".tabContainer{background-color: #151515}" +
+    ".tabContainer:hover{background-color: #333639}";
   document.head.appendChild(styles);
-
-  const menu = document.createElement("img");
-  menu.src =
-    "https://raw.githubusercontent.com/lnardon/Demoiselle/main/logo-bg.png";
-  menu.style.position = "fixed";
-  menu.style.bottom = "32px";
-  menu.style.left = "32px";
-  menu.style.width = "40px";
-  menu.style.height = "40px";
-  menu.style.borderRadius = "8px";
-  menu.style.boxShadow = "0px 0px 19px 7px rgba(0,0,0,0.29)";
-  menu.style.zIndex = "999999999";
-  menu.style.cursor = "pointer";
-  menu.style.animation =
-    "menuAppear .5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards";
-  document.body.append(menu);
-}, 500);
+}, 250);
 
 document.addEventListener("keydown", function (event) {
   if (event.altKey && event.key === "s" && !isMenuOpen) {
@@ -52,7 +37,6 @@ document.addEventListener("keydown", function (event) {
 
     chrome.runtime.sendMessage({ action: "getTabs" }, function (response) {
       let tabs = response.tabs;
-      console.log(tabs.favIconUrl);
       let tabsContainer = document.getElementById("tabs-list-container");
       tabsContainer = document.createElement("div");
       tabsContainer.id = "tabs-list-container";
@@ -62,7 +46,7 @@ document.addEventListener("keydown", function (event) {
       tabsContainer.style.zIndex = "1000000000";
       tabsContainer.style.padding = "16px 12px";
       tabsContainer.style.borderRadius = "8px";
-      tabsContainer.style.border = "none";
+      tabsContainer.style.border = "2px solid #eee";
       tabsContainer.style.animation = "input .5s ease forwards";
       tabsContainer.style.display = "flex";
       tabsContainer.style.flexDirection = "column";
@@ -75,7 +59,6 @@ document.addEventListener("keydown", function (event) {
         tabElement.classList.add("tabContainer");
         tabElement.style.fontFamily = "sans-serif";
         tabElement.style.padding = "8px";
-        tabElement.style.borderBottom = "none";
         tabElement.style.display = "flex";
         tabElement.style.flexDirection = "row";
         tabElement.style.alignItems = "center";
@@ -84,6 +67,7 @@ document.addEventListener("keydown", function (event) {
         tabElement.style.cursor = "pointer";
         tabElement.style.borderRadius = "4px";
         tabElement.style.transition = "all .1s ease";
+        tabElement.style.borderLeft = "6px solid transparent";
         tabElement.classList.add("tabContainer");
         tabElement.addEventListener("click", () => {
           closeExtension();
@@ -94,7 +78,7 @@ document.addEventListener("keydown", function (event) {
         });
 
         if (tab.active) {
-          tabElement.style.backgroundColor = "#515151";
+          tabElement.style.borderColor = "#2196f3";
         }
 
         const favicon = document.createElement("img");
@@ -118,15 +102,16 @@ document.addEventListener("keydown", function (event) {
         closeButton.src =
           "https://raw.githubusercontent.com/lnardon/Demoiselle/main/assets/close.png";
         closeButton.style.cursor = "pointer";
-        closeButton.style.width = "16px";
-        closeButton.style.height = "16px";
+        closeButton.style.width = "22px";
+        closeButton.style.height = "22px";
+        closeButton.style.marginLeft = "8px";
         closeButton.addEventListener("click", function (event) {
           event.stopPropagation();
           closeExtension();
           chrome.runtime.sendMessage({ action: "closeTab", tabId: tab.id });
         });
-
         tabElement.appendChild(closeButton);
+
         tabsContainer.appendChild(tabElement);
       });
       extensionContent.appendChild(tabsContainer);
@@ -160,7 +145,6 @@ document.addEventListener("keydown", function (event) {
       addressBar.style.fontSize = "20px";
       addressBar.style.fontWeight = "500";
       addressBar.style.fontFamily = "DejaVu Sans !important";
-
       addressBar.value = window.location.href;
       addressBar.addEventListener("keydown", function (e) {
         if (e.key === "Enter") {
@@ -187,7 +171,6 @@ document.addEventListener("keydown", function (event) {
       backButton.style.height = "55px";
       backButton.style.cursor = "pointer";
       backButton.style.transition = ".5s ease";
-
       backButton.addEventListener("click", function () {
         closeExtension();
         window.history.back();
@@ -206,7 +189,6 @@ document.addEventListener("keydown", function (event) {
       forwardButton.style.outline = "none";
       forwardButton.style.cursor = "pointer";
       forwardButton.style.transition = ".5s ease";
-
       forwardButton.addEventListener("click", function () {
         closeExtension();
         window.history.forward();
@@ -234,9 +216,6 @@ document.addEventListener("keydown", function (event) {
       input.style.outline = "none";
       input.style.fontWeight = "bold";
       input.style.marginBottom = "16px";
-
-      extensionContent.appendChild(input);
-
       input.addEventListener("keydown", function (e) {
         if (e.key === "Enter") {
           const searchTerm = encodeURIComponent(input.value);
@@ -249,6 +228,7 @@ document.addEventListener("keydown", function (event) {
           closeExtension();
         }
       });
+      extensionContent.appendChild(input);
 
       backdrop.appendChild(extensionContent);
       document.body.appendChild(backdrop);
